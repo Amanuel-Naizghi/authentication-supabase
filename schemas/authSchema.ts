@@ -1,21 +1,28 @@
 
-import { z } from "zod";
+import { z } from 'zod';
 
-export const authSchema = z
+export const signUpSchema = z
   .object({
-    firstName: z.string().trim().min(2, "First name must be at least 2 characters"),
+    name: z.string().trim().min(2, 'Name must have at least 2 characters'),
 
-    lastName: z.string().trim().min(2, "Last name must be at least 2 characters"),
+    email: z.email('Enter a valid email address'),
 
-    email: z.email("Enter a valid email address"),
-
-    password: z.string().min(8, "Password must be at least 8 characters"),
+    password: z
+      .string()
+      .min(6, 'Password must contain at least 6 characters'),
 
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
   });
 
-export type AuthFormData = z.infer<typeof authSchema>;
+export type SignUpFormData = z.infer<typeof signUpSchema>;
+
+export const signInSchema = z.object({
+  email: z.email('Enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+export type SignInFormData = z.infer<typeof signInSchema>;
