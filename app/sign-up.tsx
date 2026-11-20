@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
 import {
   View,
   Text,
@@ -10,16 +11,18 @@ import {
   StyleSheet,
 } from 'react-native';
 
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { supabase } from '../utils/supabase';
-import { signUpSchema, SignUpFormData } from '../schemas/authSchema';
+import {
+  signUpSchema,
+  type SignUpFormData,
+} from '../schemas/authSchema';
 
 export default function SignUpScreen() {
+  const router = useRouter();
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [colors, setColors] = useState<string[]>([]);
@@ -37,13 +40,6 @@ export default function SignUpScreen() {
       confirmPassword: '',
     },
   });
-
-  const navigation = useNavigation<
-    NativeStackNavigationProp<{
-      SignIn: undefined;
-      SignUp: undefined;
-    }>
-  >();
 
   // Retrieve publicly accessible data from Supabase.
   useEffect(() => {
@@ -86,11 +82,18 @@ export default function SignUpScreen() {
 
       if (data.session) {
         setMessage('Account created successfully!');
+
+        // AuthContext detects the session and
+        // Expo Router redirects to the protected screen.
       } else {
-        setMessage('Account created. Check your email to confirm your account.');
+        setMessage(
+          'Account created. Check your email to confirm your account.'
+        );
       }
     } catch {
-      setMessage('Something went wrong. Check your connection and try again.');
+      setMessage(
+        'Something went wrong. Check your connection and try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -185,7 +188,7 @@ export default function SignUpScreen() {
       {/* Submit */}
       <Pressable
         style={[styles.button, loading && styles.disabled]}
-        onPress={() => handleSubmit(onSignUp)()}
+        onPress={()=>handleSubmit(onSignUp)()}
         disabled={loading}
       >
         {loading ? (
@@ -195,8 +198,9 @@ export default function SignUpScreen() {
         )}
       </Pressable>
 
+      {/* Navigate to Sign-In */}
       <Pressable
-        onPress={() => navigation.navigate('SignIn')}
+        onPress={() => router.push('/sign-in')}
         style={{ marginTop: 20, alignItems: 'center' }}
       >
         <Text style={{ color: '#2563eb' }}>
@@ -204,7 +208,9 @@ export default function SignUpScreen() {
         </Text>
       </Pressable>
 
-      {message !== '' && <Text style={styles.message}>{message}</Text>}
+      {message !== '' && (
+        <Text style={styles.message}>{message}</Text>
+      )}
 
       {/* Public Supabase Data */}
       <View style={styles.dataSection}>

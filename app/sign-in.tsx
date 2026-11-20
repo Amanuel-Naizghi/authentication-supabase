@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useRouter } from 'expo-router';
 import {
   View,
   Text,
@@ -17,9 +16,11 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { supabase } from '../utils/supabase';
-import { signInSchema, SignInFormData } from '../schemas/authSchema';
+import { signInSchema, type SignInFormData } from '../schemas/authSchema';
 
 export default function SignInScreen() {
+  const router = useRouter();
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -34,13 +35,6 @@ export default function SignInScreen() {
       password: '',
     },
   });
-
-  const navigation = useNavigation<
-    NativeStackNavigationProp<{
-      SignIn: undefined;
-      SignUp: undefined;
-    }>
-  >();
 
   const onSignIn = async (formData: SignInFormData) => {
     setLoading(true);
@@ -58,7 +52,7 @@ export default function SignInScreen() {
       }
 
       // AuthContext automatically receives the new session.
-      // Navigation will be handled in the next step.
+      // Expo Router redirects to the protected screen.
     } catch {
       setMessage('Network error. Please check your connection and try again.');
     } finally {
@@ -119,7 +113,7 @@ export default function SignInScreen() {
         {/* Sign In Button */}
         <Pressable
           style={[styles.button, loading && styles.disabled]}
-          onPress={() => handleSubmit(onSignIn)()}
+          onPress={()=>handleSubmit(onSignIn)()}
           disabled={loading}
         >
           {loading ? (
@@ -129,8 +123,9 @@ export default function SignInScreen() {
           )}
         </Pressable>
 
+        {/* Navigate to Sign-Up */}
         <Pressable
-          onPress={() => navigation.navigate('SignUp')}
+          onPress={() => router.push('/sign-up')}
           style={{ marginTop: 20, alignItems: 'center' }}
         >
           <Text style={{ color: '#2563eb' }}>
@@ -200,3 +195,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
